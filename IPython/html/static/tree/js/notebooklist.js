@@ -11,7 +11,7 @@
 
 var IPython = (function (IPython) {
     "use strict";
-    
+
     var utils = IPython.utils;
 
     var NotebookList = function (selector, options, element_name) {
@@ -28,17 +28,25 @@ var IPython = (function (IPython) {
         this.sessions = {};
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
         this.notebook_path = options.notebook_path || utils.get_body_data("notebookPath");
-        $([IPython.events]).on('sessions_loaded.Dashboard', 
+        $([IPython.events]).on('sessions_loaded.Dashboard',
             function(e, d) { that.sessions_loaded(d); });
     };
 
     NotebookList.prototype.style = function () {
-        var prefix = '#' + this.element_name
+        var prefix = '#' + this.element_name;
         $(prefix + '_toolbar').addClass('list_toolbar');
         $(prefix + '_list_info').addClass('toolbar_info');
         $(prefix + '_buttons').addClass('toolbar_buttons');
         $(prefix + '_list_header').addClass('list_header');
         this.element.addClass("list_container");
+
+        // Initiate the first column
+
+        var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
+        var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column0');
+
+        this.element.append(column_container);
+        this.element.find('.column_container').append(column);
     };
 
 
@@ -61,7 +69,7 @@ var IPython = (function (IPython) {
         var files;
         if(dropOrForm =='drop'){
             files = event.originalEvent.dataTransfer.files;
-        } else 
+        } else
         {
             files = event.originalEvent.target.files;
         }
@@ -93,7 +101,7 @@ var IPython = (function (IPython) {
             }
         }
         // Replace the file input form wth a clone of itself. This is required to
-        // reset the form. Otherwise, if you upload a file, delete it and try to 
+        // reset the form. Otherwise, if you upload a file, delete it and try to
         // upload it again, the changed event won't fire.
         var form = $('input.fileinput');
         form.replaceWith(form.clone(true));
@@ -106,10 +114,11 @@ var IPython = (function (IPython) {
         // Parameters
         // remove_uploads: bool=False
         //      Should upload prompts also be removed from the tree.
+        var col_cont=this.element.find(".column_container");
         if (remove_uploads) {
-            this.element.children('.list_item').remove();
+            col_cont.find('#column'+(this.element.find(".column_container").children().length-1)).children('.list_item').remove();
         } else {
-            this.element.children('.list_item:not(.new-file)').remove();  
+            col_cont.find('#column'+(this.element.find(".column_container").children().length-1)).children('.list_item:not(.new-file)').remove();
         }
     };
 
@@ -154,28 +163,31 @@ var IPython = (function (IPython) {
         }
         var item = null;
         var len = data.length;
+        var path = this.notebook_path;
+        var columnNb=path.split("/").length-1;
         this.clear_list();
+
         if (len === 0) {
-            item = this.new_notebook_item(0);
+            item = this.new_notebook_item(0,columnNb);
             var span12 = item.children().first();
             span12.empty();
             span12.append($('<div style="margin:auto;text-align:center;color:grey"/>').text(message));
         }
-        var path = this.notebook_path;
+
         var offset = 0;
         if (path !== '') {
-            item = this.new_notebook_item(0);
-            this.add_dir(path, '..', item);
+            item = this.new_notebook_item(0,columnNb);
+            this.add_dir(path, '..', item);   // remove one column in the file manager JCJ
             offset = 1;
         }
         for (var i=0; i<len; i++) {
             if (data[i].type === 'directory') {
                 var name = data[i].name;
-                item = this.new_notebook_item(i+offset);
-                this.add_dir(path, name, item);
+                item = this.new_notebook_item(i+offset,columnNb);
+                this.add_dir(path, name, item);  // associating a script to add a column
             } else {
                 var name = data[i].name;
-                item = this.new_notebook_item(i+offset);
+                item = this.new_notebook_item(i+offset,columnNb);
                 this.add_link(path, name, item);
                 name = utils.url_path_join(path, name);
                 if(this.sessions[name] === undefined){
@@ -188,10 +200,11 @@ var IPython = (function (IPython) {
     };
 
 
-    NotebookList.prototype.new_notebook_item = function (index) {
+    NotebookList.prototype.new_notebook_item = function (index, columnIndex) {
+        index-=1; // God knows why
         var item = $('<div/>').addClass("list_item").addClass("row-fluid");
         // item.addClass('list_item ui-widget ui-widget-content ui-helper-clearfix');
-        // item.css('border-top-style','none');
+
         item.append($("<div/>").addClass("span12").append(
             $('<i/>').addClass('item_icon')
         ).append(
@@ -201,11 +214,12 @@ var IPython = (function (IPython) {
         ).append(
             $('<div/>').addClass("item_buttons btn-group pull-right")
         ));
-        
+
+        var col_cont=this.element.find(".column_container");
         if (index === -1) {
-            this.element.append(item);
+            col_cont.find("div#column"+columnIndex).append(item);
         } else {
-            this.element.children().eq(index).after(item);
+            col_cont.find("div#column"+columnIndex).children().eq(index).after(item); //doesnt work //original
         }
         return item;
     };
@@ -216,15 +230,36 @@ var IPython = (function (IPython) {
         item.data('path', path);
         item.find(".item_name").text(name);
         item.find(".item_icon").addClass('folder_icon').addClass('icon-fixed-width');
-        item.find("a.item_link")
-            .attr('href',
-                utils.url_join_encode(
-                    this.base_url,
-                    "tree",
-                    path,
-                    name
-                )
-            );
+        //item.find("a.item_link").css('cursor', 'pointer');
+        var columnNb=path.split("/").length;
+        var that=this;
+        var col_cont=this.element.find(".column_container");
+        if (name == '..') {
+            item.click(function(){
+                // erase the column and every child
+                for (var i=col_cont.children().length-1;i>=columnNb-1;i--) {
+                    col_cont.children('.column_item#column'+i).remove();
+                    that.notebook_path=path.split("/").slice(0,-1).join("/");
+                }
+            });
+        }
+        else {
+            // add a new column
+            item.click(function(){
+                // remove children in case we went already deep into the file structure
+                for (var i=col_cont.children().length-1;i>=columnNb;i--) {
+                    col_cont.children('.column_item#column'+i).remove(); // still need to be tested
+                }
+                that.notebook_path=path;
+
+                var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column'+columnNb);
+
+                that.notebook_path=that.notebook_path+'/'+name; // might be dangerous
+                col_cont.append(column);
+                that.load_list();
+            });
+        }
+
     };
 
 
@@ -416,8 +451,8 @@ var IPython = (function (IPython) {
         );
         $.ajax(url, settings);
     };
-    
-    
+
+
     NotebookList.prototype.new_notebook_failed = function (xhr, status, error) {
         utils.log_ajax_error(xhr, status, error);
         var msg;
@@ -432,8 +467,8 @@ var IPython = (function (IPython) {
             buttons : {'OK' : {'class' : 'btn-primary'}}
         });
     }
-    
-    
+
+
     IPython.NotebookList = NotebookList;
 
     return IPython;

@@ -30,7 +30,7 @@ ul.breadcrumb {
         font-size: 16px;
         margin-right: 4px;
     }
-    
+
     span {
         color: @dark_dashboard_color;
     }
@@ -46,6 +46,7 @@ ul.breadcrumb {
 
 .list_header {
     font-weight: bold;
+    border-bottom: 1px solid @border_color;
 }
 
 .list_container {
@@ -53,13 +54,15 @@ ul.breadcrumb {
   margin-bottom: 5*@dashboard_tb_pad;
   border: 1px solid @border_color;
   border-radius: 4px;
+  overflow-y: hidden;
+  height: 500px;
 }
 
 .list_container > div {
-  border-bottom: 1px solid @border_color;
   &:hover .list-item{
     background-color: red;
   };
+  width:200%;
 }
 
 .list_container > div:last-child {
@@ -71,6 +74,21 @@ ul.breadcrumb {
     background-color: #ddd;
   };
   a {text-decoration: none;}
+}
+
+.column_container {
+    height: 500px;
+    overflow-y: auto;
+    white-space: nowrap;
+}
+
+.column_item {
+    width: 200px;
+    height: inherit;
+    border-right: 1px solid @border_color;
+    white-space: nowrap;
+    overflow: auto;
+    float: left;
 }
 
 .list_header>div, .list_item>div {
@@ -88,13 +106,17 @@ ul.breadcrumb {
 }
 
 .item_icon {
-    font-size: 14px; 
+    font-size: 14px;
     color: @dark_dashboard_color;
     margin-right: @dashboard_lr_pad;
 }
 
 .item_buttons {
     line-height: 1em;
+}
+
+a.item_link {
+    cursor: pointer;
 }
 
 .toolbar_info {
@@ -124,7 +146,7 @@ input.engine_num_input {
     margin-bottom: 0px;
     background-color: transparent;
     font-weight: bold;
-   
+
 }
 
 .folder_icon:before {
