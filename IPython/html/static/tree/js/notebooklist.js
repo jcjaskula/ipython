@@ -44,6 +44,7 @@ var IPython = (function (IPython) {
 
         var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
         var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column0');
+        //column.css('width','100%');
 
         this.element.append(column_container);
         this.element.find('.column_container').append(column);
@@ -116,10 +117,11 @@ var IPython = (function (IPython) {
         //      Should upload prompts also be removed from the tree.
         var col_cont=this.element.find(".column_container");
         if (remove_uploads) {
-            col_cont.find('#column'+(this.element.find(".column_container").children().length-1)).children('.list_item').remove();
+            col_cont.find('#column'+(col_cont.children().length-1)).children('.list_item').remove();
         } else {
-            col_cont.find('#column'+(this.element.find(".column_container").children().length-1)).children('.list_item:not(.new-file)').remove();
+            col_cont.find('#column'+(col_cont.children().length-1)).children('.list_item:not(.new-file)').remove();
         }
+
     };
 
     NotebookList.prototype.load_sessions = function(){
@@ -230,7 +232,8 @@ var IPython = (function (IPython) {
         item.data('path', path);
         item.find(".item_name").text(name);
         item.find(".item_icon").addClass('folder_icon').addClass('icon-fixed-width');
-        //item.find("a.item_link").css('cursor', 'pointer');
+
+
         var columnNb=path.split("/").length;
         var that=this;
         var col_cont=this.element.find(".column_container");
@@ -240,6 +243,7 @@ var IPython = (function (IPython) {
                 for (var i=col_cont.children().length-1;i>=columnNb-1;i--) {
                     col_cont.children('.column_item#column'+i).remove();
                     that.notebook_path=path.split("/").slice(0,-1).join("/");
+                    that.element.find('.breadcrumb').find('li:last').remove();
                 }
             });
         }
@@ -248,15 +252,29 @@ var IPython = (function (IPython) {
             item.click(function(){
                 // remove children in case we went already deep into the file structure
                 for (var i=col_cont.children().length-1;i>=columnNb;i--) {
-                    col_cont.children('.column_item#column'+i).remove(); // still need to be tested
+                    col_cont.children('.column_item#column'+i).remove();
+                    that.element.find('.breadcrumb').find('li:last').remove();
                 }
-                that.notebook_path=path;
 
+                //create a new column (the columnNb-th )
                 var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column'+columnNb);
 
-                that.notebook_path=that.notebook_path+'/'+name; // might be dangerous
+                // resizing the container
+                col_cont.css('width',((columnNb+1)*201)+"px");
+
+                that.notebook_path=path+'/'+name; // might be dangerous
                 col_cont.append(column);
                 that.load_list();
+                //Render the breadctumb
+                var bc_element=$('<li>').append($('<a/>').attr('href',
+                    utils.url_join_encode(
+                        that.base_url,
+                        "tree",
+                        path,
+                        name)
+                    ).text(name)
+                    ).append($('<span/>').text('/'));
+                that.element.find('.breadcrumb').append(bc_element);
             });
         }
 
