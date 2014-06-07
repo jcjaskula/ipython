@@ -43,8 +43,7 @@ var IPython = (function (IPython) {
         // Initiate the first column
 
         var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
-        var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column0');
-        //column.css('width','100%');
+        var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column0')
 
         this.element.append(column_container);
         this.element.find('.column_container').append(column);
@@ -115,11 +114,16 @@ var IPython = (function (IPython) {
         // Parameters
         // remove_uploads: bool=False
         //      Should upload prompts also be removed from the tree.
-        var col_cont=this.element.find(".column_container");
-        if (remove_uploads) {
-            col_cont.find('#column'+(col_cont.children().length-1)).children('.list_item').remove();
+        if (this.element.find(".column_container").length) {
+            var col_cont=this.element.find(".column_container").find('#column'+(this.element.find(".column_container").children().length-1));
         } else {
-            col_cont.find('#column'+(col_cont.children().length-1)).children('.list_item:not(.new-file)').remove();
+            var col_cont=this.element;
+        }
+
+        if (remove_uploads) {
+            col_cont.children('.list_item').remove();
+        } else {
+            col_cont.children('.list_item:not(.new-file)').remove();
         }
 
     };
@@ -217,11 +221,16 @@ var IPython = (function (IPython) {
             $('<div/>').addClass("item_buttons btn-group pull-right")
         ));
 
-        var col_cont=this.element.find(".column_container");
-        if (index === -1) {
-            col_cont.find("div#column"+columnIndex).append(item);
+        if (columnIndex < 0) {
+            var col_cont=this.element;
         } else {
-            col_cont.find("div#column"+columnIndex).children().eq(index).after(item); //doesnt work //original
+            var col_cont=this.element.find(".column_container").find("div#column"+columnIndex);
+        }
+
+        if (index === -1) {
+            col_cont.append(item);
+        } else {
+            col_cont.children().eq(index).after(item); //doesnt work //original
         }
         return item;
     };
@@ -232,7 +241,6 @@ var IPython = (function (IPython) {
         item.data('path', path);
         item.find(".item_name").text(name);
         item.find(".item_icon").addClass('folder_icon').addClass('icon-fixed-width');
-
 
         var columnNb=path.split("/").length;
         var that=this;
