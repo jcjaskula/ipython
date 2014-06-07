@@ -43,7 +43,7 @@ var IPython = (function (IPython) {
         // Initiate the first column
 
         var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
-        var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column0')
+        var column = $('<div/>').addClass("column_item").attr('id', 'column0')
 
         this.element.append(column_container);
         this.element.find('.column_container').append(column);
@@ -64,7 +64,7 @@ var IPython = (function (IPython) {
         });
     };
 
-    NotebookList.prototype.handleFilesUpload =  function(event, dropOrForm) {
+    NotebookList.prototype.handleFilesUpload = function(event, dropOrForm) {
         var that = this;
         var files;
         if(dropOrForm =='drop'){
@@ -196,10 +196,10 @@ var IPython = (function (IPython) {
                 item = this.new_notebook_item(i+offset,columnNb);
                 this.add_link(path, name, item);
                 name = utils.url_path_join(path, name);
-                if(this.sessions[name] === undefined){
+                if(this.sessions[name.slice(1)] === undefined){
                     this.add_delete_button(item);
                 } else {
-                    this.add_shutdown_button(item,this.sessions[name]);
+                    this.add_shutdown_button(item,this.sessions[name.slice(1)]);
                 }
             }
         }
@@ -265,7 +265,7 @@ var IPython = (function (IPython) {
                 }
 
                 //create a new column (the columnNb-th )
-                var column = $('<div/>').addClass("column_item").addClass("column-fluid").attr('id', 'column'+columnNb);
+                var column = $('<div/>').addClass("column_item").attr('id', 'column'+columnNb);
 
                 // resizing the container
                 col_cont.css('width',((columnNb+1)*201)+"px");

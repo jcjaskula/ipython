@@ -16,6 +16,7 @@ var IPython = (function (IPython) {
 
     var KernelList = function (selector, options) {
         IPython.NotebookList.call(this, selector, options, 'running');
+        this.element.find('#running_column_container').remove();
     };
 
     KernelList.prototype = Object.create(IPython.NotebookList.prototype);
@@ -25,14 +26,14 @@ var IPython = (function (IPython) {
         this.clear_list();
         var item;
         for (var path in d) {
-            item = this.new_notebook_item(-1);
+            item = this.new_notebook_item(0,-1); //was -1 JCJ 2014 06 06
             this.add_link('', path, item);
             this.add_shutdown_button(item, this.sessions[path]);
         }
-       
+
         $('#running_list_header').toggle($.isEmptyObject(d));
     }
-    
+
     IPython.KernelList = KernelList;
 
     return IPython;
