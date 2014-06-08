@@ -28,6 +28,7 @@ var IPython = (function (IPython) {
         this.sessions = {};
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
         this.notebook_path = options.notebook_path || utils.get_body_data("notebookPath");
+        this.orig_path_depth=this.notebook_path.split('/').length;
         $([IPython.events]).on('sessions_loaded.Dashboard',
             function(e, d) { that.sessions_loaded(d); });
     };
@@ -170,10 +171,11 @@ var IPython = (function (IPython) {
         var item = null;
         var len = data.length;
         var path = this.notebook_path;
-        var columnNb=path.split("/").length-1;
+        var columnNb=this.element.find(".column_container").children().length-1;
         this.clear_list();
 
-        if (len === 0) {
+
+        if (len === 0 && columnNb === 0) {
             item = this.new_notebook_item(0,columnNb);
             var span12 = item.children().first();
             span12.empty();
@@ -242,16 +244,25 @@ var IPython = (function (IPython) {
         item.find(".item_name").text(name);
         item.find(".item_icon").addClass('folder_icon').addClass('icon-fixed-width');
 
-        var columnNb=path.split("/").length;
         var that=this;
         var col_cont=this.element.find(".column_container");
+        var path_depth=path.split("/").length;
         if (name == '..') {
             item.click(function(){
                 // erase the column and every child
-                for (var i=col_cont.children().length-1;i>=columnNb-1;i--) {
+                for (var i=col_cont.children().length-1;i>=path_depth-that.orig_path_depth;i--) {
+                    if (i<=0) {
+                        if (that.orig_path_depth>1)
+                            that.orig_path_depth--;
+                        that.notebook_path=path.split("/").slice(0,-1).join("/");
+                        that.element.find('.breadcrumb').find('li:last').remove();
+                        that.load_list();
+                        break;
+                    }
                     col_cont.children('.column_item#column'+i).remove();
                     that.notebook_path=path.split("/").slice(0,-1).join("/");
                     that.element.find('.breadcrumb').find('li:last').remove();
+                    that.load_list();
                 }
             });
         }
@@ -259,16 +270,21 @@ var IPython = (function (IPython) {
             // add a new column
             item.click(function(){
                 // remove children in case we went already deep into the file structure
-                for (var i=col_cont.children().length-1;i>=columnNb;i--) {
+                // !!!! Do not store col_cont.children().length-1 in a variable because it needs to be evaluated at the click
+                for (var i=col_cont.children().length-1;i>=path_depth-that.orig_path_depth+1;i--) {
+                    if (i<=0) {
+                        that.element.find('.breadcrumb').find('li:last').remove();
+                        break;
+                    }
                     col_cont.children('.column_item#column'+i).remove();
                     that.element.find('.breadcrumb').find('li:last').remove();
                 }
-
+                
                 //create a new column (the columnNb-th )
-                var column = $('<div/>').addClass("column_item").attr('id', 'column'+columnNb);
+                var column = $('<div/>').addClass("column_item").attr('id', 'column'+(col_cont.children().length));
 
                 // resizing the container
-                col_cont.css('width',((columnNb+1)*201)+"px");
+                //col_cont.css('width',((columnNb+1)*201)+"px");
 
                 that.notebook_path=path+'/'+name; // might be dangerous
                 col_cont.append(column);

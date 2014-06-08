@@ -1,3 +1,7 @@
+.clearfix{*zoom:1}.clearfix:before,.clearfix:after{display:table;content:"";line-height:0}
+.clearfix:after{clear:both}
+.hide-text{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}
+.input-block-level{display:block;width:100%;min-height:30px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 article,aside,details,figcaption,figure,footer,header,hgroup,nav,section{display:block}
 audio,canvas,video{display:inline-block;*display:inline;*zoom:1}
 audio:not([controls]){display:none}
@@ -852,10 +856,6 @@ a.label:hover,a.label:focus,a.badge:hover,a.badge:focus{color:#fff;text-decorati
 .show{display:block}
 .invisible{visibility:hidden}
 .affix{position:fixed}
-.clearfix{*zoom:1}.clearfix:before,.clearfix:after{display:table;content:"";line-height:0}
-.clearfix:after{clear:both}
-.hide-text{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}
-.input-block-level{display:block;width:100%;min-height:30px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 @-ms-viewport{width:device-width}.hidden{display:none;visibility:hidden}
 .visible-phone{display:none !important}
 .visible-tablet{display:none !important}
@@ -1316,12 +1316,12 @@ ul.breadcrumb span{color:#5e5e5e;padding:4px}
 .list_toolbar{padding:4px 0 4px 0}
 .list_toolbar [class*="span"]{min-height:26px}
 .list_header{font-weight:bold;border-bottom:1px solid #ababab}
-.list_container{margin-top:4px;margin-bottom:20px;border:1px solid #ababab;border-radius:4px;overflow-y:hidden;height:500px}
+.list_container{margin-top:4px;margin-bottom:20px;border:1px solid #ababab;border-radius:4px;overflow-y:hidden;height:500px;width:99.8%;display:table;table-layout:fixed}
 .list_container>div:hover .list-item{background-color:#f00}
 .list_item:hover .list_item{background-color:#ddd}
 .list_item a{text-decoration:none}
 .column_container{height:500px;overflow-y:auto}
-.column_item{width:200px;height:inherit;border-right:1px solid #ababab;overflow:auto;float:left}
+.column_item{width:200px;height:inherit;border-right:1px solid #ababab;overflow:auto;float:left;white-space:pre}
 .list_header>div,.list_item>div{padding-top:4px;padding-bottom:4px;padding-left:7px;padding-right:7px;height:22px;line-height:22px}
 .item_name{line-height:22px;height:26px}
 .item_icon{font-size:14px;color:#5e5e5e;margin-right:7px}
