@@ -26,7 +26,7 @@ var IPython = (function (IPython) {
         this.clear_list();
         var item;
         for (var path in d) {
-            item = this.new_notebook_item(0,-1); //was -1 JCJ 2014 06 06
+            item = this.new_notebook_item(-2,-1); //-2 is a hack to counteract the index+2 in new_notebook_item, because we don't resize this container
             this.add_link('', path, item);
             this.add_shutdown_button(item, this.sessions[path]);
         }

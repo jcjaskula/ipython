@@ -50,6 +50,7 @@ ul.breadcrumb {
 .list_header {
     font-weight: bold;
     border-bottom: 1px solid @border_color;
+    position:relative;
 }
 
 .list_container {
@@ -60,8 +61,7 @@ ul.breadcrumb {
   overflow-y: hidden;
   height: 500px;
   width: 99.8%;
-  display: table;
-  table-layout: fixed;
+  display: block;
 }
 
 .list_container > div {
@@ -87,8 +87,8 @@ ul.breadcrumb {
     height: inherit;
     border-right: 1px solid @border_color;
     overflow: auto;
+    overflow-x: hidden;
     float: left;
-    white-space: pre;
 }
 
 .list_header>div, .list_item>div {

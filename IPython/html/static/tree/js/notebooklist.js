@@ -16,7 +16,6 @@ var IPython = (function (IPython) {
 
     var NotebookList = function (selector, options, element_name) {
         var that = this
-        // allow code re-use by just changing element_name in kernellist.js
         this.element_name = element_name || 'notebook';
         this.selector = selector;
         if (this.selector !== undefined) {
@@ -44,7 +43,7 @@ var IPython = (function (IPython) {
         // Initiate the first column
 
         var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
-        var column = $('<div/>').addClass("column_item").attr('id', 'column0')
+        var column = $('<div/>').addClass("column_item").attr('id', 'column0').resizable();
 
         this.element.append(column_container);
         this.element.find('.column_container').append(column);
@@ -197,19 +196,38 @@ var IPython = (function (IPython) {
                 var name = data[i].name;
                 item = this.new_notebook_item(i+offset,columnNb);
                 this.add_link(path, name, item);
-                name = utils.url_path_join(path, name);
-                if(this.sessions[name.slice(1)] === undefined){
+
+                if (path !== '') { // Need to clean this test
+                    name = utils.url_path_join('/'+path, name);
+                } else {
+                    name = utils.url_path_join(path, name);
+                }
+
+                if(this.sessions[name.slice(1)] === undefined) {
                     this.add_delete_button(item);
                 } else {
                     this.add_shutdown_button(item,this.sessions[name.slice(1)]);
                 }
+            }
+
+            // Resize the column to fit the item if needed
+            var current_col=this.element.find(".column_container").children().last(); // does it work?
+            var padding=parseInt(item.children().first().css("padding-left").slice(0,-2))*4; // *4 to be large
+            var item_width=item.find(".item_icon").outerWidth()+item.find(".item_link").outerWidth()+item.find(".item_buttons").outerWidth() + padding;
+
+            if (item.width() < item_width) {
+                current_col.width(item_width);
+            }
+
+            if (current_col.resizable( "option", "minWidth" ) < item_width) {
+                current_col.resizable("option", "minWidth", item_width);
             }
         }
     };
 
 
     NotebookList.prototype.new_notebook_item = function (index, columnIndex) {
-        index-=1; // God knows why
+        index+=2; // +1 because of the ui-resizable
         var item = $('<div/>').addClass("list_item").addClass("row-fluid");
         // item.addClass('list_item ui-widget ui-widget-content ui-helper-clearfix');
 
@@ -229,10 +247,10 @@ var IPython = (function (IPython) {
             var col_cont=this.element.find(".column_container").find("div#column"+columnIndex);
         }
 
-        if (index === -1) {
+        if (index === 0) { // Is this if necessary?
             col_cont.append(item);
         } else {
-            col_cont.children().eq(index).after(item); //doesnt work //original
+            col_cont.children().eq(index).after(item);
         }
         return item;
     };
@@ -279,16 +297,23 @@ var IPython = (function (IPython) {
                     col_cont.children('.column_item#column'+i).remove();
                     that.element.find('.breadcrumb').find('li:last').remove();
                 }
-                
-                //create a new column (the columnNb-th )
-                var column = $('<div/>').addClass("column_item").attr('id', 'column'+(col_cont.children().length));
 
-                // resizing the container
-                //col_cont.css('width',((columnNb+1)*201)+"px");
+                //create a new column (the columnNb-th )
+                var column = $('<div/>').addClass("column_item").attr('id', 'column'+(col_cont.children().length)).resizable();
 
                 that.notebook_path=path+'/'+name; // might be dangerous
                 col_cont.append(column);
                 that.load_list();
+
+                //resize header
+                var totalWidth=2;
+                for (var i=0; i<=col_cont.children().length;i++){
+                        totalWidth+=col_cont.children('.column_item#column'+i).outerWidth();
+                }
+                col_cont.width(totalWidth);
+                if (that.element.find(".list_header").outerWidth() < totalWidth)
+                    that.element.find(".list_header").outerWidth(totalWidth);
+
                 //Render the breadctumb
                 var bc_element=$('<li>').append($('<a/>').attr('href',
                     utils.url_join_encode(
