@@ -220,7 +220,9 @@ var IPython = (function (IPython) {
             var item_width=item.find(".item_icon").outerWidth()+item.find(".item_link").outerWidth()+item.find(".item_buttons").outerWidth() + padding;
 
             if (item.width() < item_width) {
+                this.element.find(".column_container").width(item_width-item.width()+this.element.find(".column_container").width());
                 current_col.width(item_width);
+
             }
 
             if (current_col.resizable( "option", "minWidth" ) < item_width) {
