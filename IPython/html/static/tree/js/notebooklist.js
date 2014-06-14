@@ -37,13 +37,17 @@ var IPython = (function (IPython) {
         $(prefix + '_toolbar').addClass('list_toolbar');
         $(prefix + '_list_info').addClass('toolbar_info');
         $(prefix + '_buttons').addClass('toolbar_buttons');
-        $(prefix + '_list_header').addClass('list_header');
+        $(prefix + '_list_header').addClass('list_header').addClass('column_resizable');
         this.element.addClass("list_container");
 
         // Initiate the first column
 
-        var column_container = $('<div/>').addClass("column_container").attr('id',this.element_name + '_column_container');
+        var column_container = $('<div/>').addClass("column_container").addClass('column_resizable').attr('id',this.element_name + '_column_container');
         var column = $('<div/>').addClass("column_item").attr('id', 'column0').resizable();
+        column.resizable("option", "alsoResize", ".column_resizable");
+
+        // Set min width for running_list_header
+        //$(prefix + '_list_header').resizable("option", "minWidth", $(prefix + '_list_header').width());
 
         this.element.append(column_container);
         this.element.find('.column_container').append(column);
@@ -300,6 +304,7 @@ var IPython = (function (IPython) {
 
                 //create a new column (the columnNb-th )
                 var column = $('<div/>').addClass("column_item").attr('id', 'column'+(col_cont.children().length)).resizable();
+                column.resizable("option", "alsoResize", ".column_resizable");
 
                 that.notebook_path=path+'/'+name; // might be dangerous
                 col_cont.append(column);
