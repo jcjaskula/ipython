@@ -233,7 +233,7 @@ var IPython = (function (IPython) {
 
 
     NotebookList.prototype.new_notebook_item = function (index, columnIndex) {
-        index+=2; // +1 because of the ui-resizable
+        index+=2; // +2 because of the ui-resizable
         var item = $('<div/>').addClass("list_item").addClass("row-fluid");
         // item.addClass('list_item ui-widget ui-widget-content ui-helper-clearfix');
 
@@ -303,6 +303,10 @@ var IPython = (function (IPython) {
                     col_cont.children('.column_item#column'+i).remove();
                     that.element.find('.breadcrumb').find('li:last').remove();
                 }
+
+                item.parent().find('.folder_opened').remove();  // Unmarked the old opened folder
+                var folder_opened=$('<div/>').addClass("folder_opened").text('\u25B8'); //Marked the new
+                item.find('.item_name').append(folder_opened);
 
                 //create a new column (the columnNb-th )
                 var column = $('<div/>').addClass("column_item").attr('id', 'column'+(col_cont.children().length)).resizable();
